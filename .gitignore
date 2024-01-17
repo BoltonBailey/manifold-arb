@@ -1,0 +1,5 @@
+*/constants.py
+**/__pycache__/**
+**/img/**
+.vscode/**
+.DS_Store
