@@ -4,7 +4,7 @@ from constants import API_KEY
 import json
 import time
 
-# Example json 
+# Example json
 # {
 # "id": "7saOUy7MabAtKEBq5rvg",
 # "creatorId": "uyzAXSRdCCUWs4KstCLq2GfzAip2",
@@ -48,6 +48,7 @@ import time
 # "textDescription": ""
 # }
 
+
 def maniswap_prob_from_pool(pool_yes, pool_no, p):
     """
     Calculate the probability of a maniswap market with the given pool sizes and price.
@@ -72,26 +73,26 @@ class InfoState:
 
     def __str__(self):
         return f"InfoState(pool_yes={self.pool_yes}, pool_no={self.pool_no}, p={self.p})"
-    
+
     def __repr__(self):
         return str(self)
-    
+
     def __eq__(self, __value: object) -> bool:
         if not isinstance(__value, InfoState):
             return False
         return self.pool_yes == __value.pool_yes and self.pool_no == __value.pool_no and self.p == __value.p
-    
+
     def __hash__(self) -> int:
         return hash((self.pool_yes, self.pool_no, self.p))
-    
+
     @property
     def invariant(self):
         return self.pool_yes ** self.p * self.pool_no ** (1 - self.p)
-    
+
     @property
     def prob(self):
         return maniswap_prob_from_pool(self.pool_yes, self.pool_no, self.p)
-    
+
     def new_state_from_buy(self, amount, yes):
         """
         Simulates spending amount mana to buy yes (or no) shares.
@@ -104,16 +105,16 @@ class InfoState:
         else:
             pool_yes = self.pool_yes + amount
             pool_no = (self.invariant / pool_yes ** self.p) ** (1/(1-self.p))
-        
+
         return InfoState(pool_yes, pool_no, self.p)
-    
+
     def shares_received_from_buy(self, amount, yes):
         """
         Simulates spending amount mana to buy yes (or no) shares.
 
         Returns new InfoState.
         """
-        
+
         new_state = self.new_state_from_buy(amount, yes)
         if yes:
             return self.pool_yes - new_state.pool_yes + amount
@@ -142,11 +143,11 @@ class Market:
             self.api_data_ = get_data_from_marketID(self.marketId)
         else:
             raise ValueError("Must specify either marketId or slug")
-        
+
         if self.api_data_ == []:
             print(json.dumps(self.api_data_, indent=4))
             raise ValueError("API data empty")
-        
+
         self.slug = self.api_data_["slug"]
         self.marketId = self.api_data_["id"]
         return self.api_data_
@@ -154,7 +155,7 @@ class Market:
     @property
     def id(self):
         return self.data["id"]
-    
+
     @property
     def market_id(self):
         return self.id
@@ -164,19 +165,19 @@ class Market:
         # TODO clear data from the cache in api.py
         self.api_data_ = None
         pass
-    
+
     @property
     def creatorId(self):
         return self.data["creatorId"]
-    
+
     @property
     def creatorUsername(self):
         return self.data["creatorUsername"]
-    
+
     @property
     def creatorName(self):
         return self.data["creatorName"]
-    
+
     @property
     def createdTime(self):
         return self.data["createdTime"]
@@ -184,11 +185,11 @@ class Market:
     @property
     def price(self):
         return self.data["probability"]
-        
+
     @property
     def question(self):
         return self.data["question"]
-    
+
     @property
     def url(self):
         return self.data["url"]
@@ -196,35 +197,35 @@ class Market:
     @property
     def p(self):
         return self.data["p"]
-    
+
     @property
     def pool_yes(self):
         return self.data["pool"]["YES"]
-    
+
     @property
     def pool_no(self):
         return self.data["pool"]["NO"]
-    
+
     @property
     def probability(self):
         return self.data["probability"]
-    
+
     @property
     def outcomeType(self):
         return self.data["outcomeType"]
-    
+
     @property
     def closeTime(self):
         return self.data["closeTime"]
-    
+
     @property
     def isResolved(self):
         return self.data["isResolved"]
-    
+
     @property
     def isClosed(self):
         return self.isResolved or self.closeTime < time.time() * 1000
-    
+
     def current_state(self):
         return InfoState(self.pool_yes, self.pool_no, self.p)
 
@@ -233,7 +234,7 @@ class Market:
 
     def __repr__(self):
         return str(self)
-    
+
     def post_order(self, mana_amount, outcome, limit_prob, expiration_delta=60*1000):
         """
         Post an order to the market with the given id.
@@ -252,8 +253,6 @@ class MultiMarketAnswer:
         self.market = Market(slug=slug)
         self.answer_text = answer_text
 
-
-
     def refresh(self):
         """ Re-request the market state from the API."""
         self.market.refresh()
@@ -261,29 +260,32 @@ class MultiMarketAnswer:
     @property
     def answer_data(self):
         # Get the first answer from self.market.data["answers"] that matches answer_text
-        answers_texts = [answer["text"] for answer in self.market.data["answers"]]
-        answers_with_text = [answer["text"] for answer in self.market.data["answers"] if answer["text"] == self.answer_text]
+        answers_texts = [answer["text"]
+                         for answer in self.market.data["answers"]]
+        answers_with_text = [answer["text"]
+                             for answer in self.market.data["answers"] if answer["text"] == self.answer_text]
         if len(answers_with_text) == 0:
             print("Found answers", answers_texts)
-            raise ValueError(f"No answer with text {self.answer_text} found in market {self.slug}")
+            raise ValueError(
+                f"No answer with text {self.answer_text} found in market {self.slug}")
         return next(answer for answer in self.market.data["answers"] if answer["text"] == self.answer_text)
 
     @property
     def market_id(self):
         return self.market.id
-    
+
     @property
     def answer_id(self):
         return self.answer_data["id"]
-    
+
     @property
     def question(self):
         return f"{self.market.question} ({self.answer_text})"
-    
+
     @property
     def url(self):
         return self.market.url
-    
+
     @property
     def probability(self):
         return self.answer_data["probability"]
@@ -295,15 +297,15 @@ class MultiMarketAnswer:
     @property
     def pool_no(self):
         return self.answer_data["pool"]["NO"]
-    
+
     @property
     def pool_yes(self):
         return self.answer_data["pool"]["YES"]
-    
+
     @property
     def isClosed(self):
         return self.market.isClosed
-    
+
     def current_state(self):
         return InfoState(self.pool_yes, self.pool_no, self.p)
 
@@ -312,13 +314,12 @@ class MultiMarketAnswer:
 
     def __repr__(self):
         return str(self)
-    
+
     def post_order(self, mana_amount, outcome, limit_prob, expiration_delta=60*1000):
         """p
         Post an order to the market with the given id.
         """
         return post_order_independent_multi(self.market_id, self.answer_id, mana_amount, outcome, limit_prob, expiration_delta=expiration_delta)
-    
 
 
 class Share:
@@ -335,7 +336,6 @@ class Share:
             self.market = MultiMarketAnswer(slug=slug, answer_text=answer_text)
         self.answer_text = answer_text
 
-
     def refresh(self):
         """ Re-request the market state from the API."""
         self.market.refresh()
@@ -348,18 +348,18 @@ class Share:
 
     def __repr__(self):
         return str(self)
-    
+
     def __eq__(self, __value: object) -> bool:
         if not isinstance(__value, Share):
             return False
         return self.market.market_id == __value.market.market_id and self.answer_text == __value.answer_text and self.yes == __value.yes
-    
+
     def __hash__(self) -> int:
         return hash((self.slug, self.answer_text, self.yes))
-    
+
     def __invert__(self):
         return Share(self.slug, answer_text=self.answer_text, yes=not self.yes)
-    
+
     def marginal_price(self):
         """
         Calculate the marginal price of buying a share.
@@ -368,6 +368,6 @@ class Share:
 
     def post_order(self, mana_amount, limit_prob, expiration_delta=60*1000):
 
-        assert(self.market.isClosed == False)
+        assert (self.market.isClosed == False)
 
         return self.market.post_order(mana_amount, "YES" if self.yes else "NO", limit_prob, expiration_delta=expiration_delta)

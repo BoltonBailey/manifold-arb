@@ -7,10 +7,11 @@ import functools
 from constants import API_KEY
 
 
-READ_REQUEST_RATE_LIMIT = 0.01 # seconds
-BET_RATE_LIMIT = 6 # seconds
+READ_REQUEST_RATE_LIMIT = 0.01  # seconds
+BET_RATE_LIMIT = 6  # seconds
 BOT_USERNAME = "JointBot"
 BOT_ID = "dTaXWSfwgkSAJDDlzmIGrEQIl2X2"
+
 
 def get_balance():
     """
@@ -29,6 +30,7 @@ def get_balance():
 
     return response.json()["balance"]
 
+
 def get_data_from_slug(slug):
 
     print(f"Getting market data for {slug}")
@@ -46,6 +48,7 @@ def get_data_from_slug(slug):
 
     return response.json()
 
+
 def get_data_from_marketID(marketId):
 
     print(f"Getting market data for {marketId}")
@@ -62,6 +65,7 @@ def get_data_from_marketID(marketId):
         return []
 
     return response.json()
+
 
 def get_markets():
     """
@@ -88,11 +92,12 @@ def post_order_binary(market_id, mana_amount, outcome, end_prob, expiration_delt
     """
     # TODO see https://docs.manifold.markets/api#post-v0bets for docs on posting orders
 
-    print(f"Posting order for market {market_id}, for {mana_amount} mana to outcome {outcome}, with end prob {end_prob}")
+    print(
+        f"Posting order for market {market_id}, for {mana_amount} mana to outcome {outcome}, with end prob {end_prob}")
 
     # From mqp "yeah you need to specify also an answerId"
 
-    assert(outcome in ["YES", "NO"])
+    assert (outcome in ["YES", "NO"])
 
     expiration_time = time.time() + expiration_delta
 
@@ -102,7 +107,8 @@ def post_order_binary(market_id, mana_amount, outcome, end_prob, expiration_delt
     response = requests.post(
         "https://api.manifold.markets/v0/bet",
         json={
-            "amount": int(mana_amount), # This can't be a float, even though the backend supports floats
+            # This can't be a float, even though the backend supports floats
+            "amount": int(mana_amount),
             "outcome": outcome,
             "contractId": market_id
         },
@@ -116,18 +122,18 @@ def post_order_binary(market_id, mana_amount, outcome, end_prob, expiration_delt
         print(f"Error posting order for market {market_id}")
         print(response.text)
         return False
-    
 
     if abs(response.json()["probAfter"] - end_prob) > 0.001:
         print(f"Weird order for market {market_id}")
-        print(f"Expected final prob {end_prob} but got {response.json()['probAfter']}")
+        print(
+            f"Expected final prob {end_prob} but got {response.json()['probAfter']}")
         print(response.text)
         return True
 
     print("Success")
 
-    
     return True
+
 
 def post_order_independent_multi(market_id, answer_id, mana_amount, outcome, limit_prob, expiration_delta=60*1000):
     """
@@ -135,9 +141,10 @@ def post_order_independent_multi(market_id, answer_id, mana_amount, outcome, lim
     """
     # TODO see https://docs.manifold.markets/api#post-v0bets for docs on posting orders
 
-    print(f"Posting order for market {market_id} {answer_id}, for {mana_amount} mana to outcome {outcome}, with limit prob {limit_prob}")
+    print(
+        f"Posting order for market {market_id} {answer_id}, for {mana_amount} mana to outcome {outcome}, with limit prob {limit_prob}")
 
-    assert(outcome in ["YES", "NO"])
+    assert (outcome in ["YES", "NO"])
 
     expiration_time = time.time() + expiration_delta
 
@@ -147,7 +154,8 @@ def post_order_independent_multi(market_id, answer_id, mana_amount, outcome, lim
     response = requests.post(
         "https://api.manifold.markets/v0/bet",
         json={
-            "amount": int(mana_amount), # I think this can be a float if desired
+            # I think this can be a float if desired
+            "amount": int(mana_amount),
             "outcome": outcome,
             "contractId": market_id,
             "answerId": answer_id
@@ -162,10 +170,11 @@ def post_order_independent_multi(market_id, answer_id, mana_amount, outcome, lim
         print(f"Error posting order for market {market_id}")
         print(response.text)
         return False
-    
+
     print("Success")
     # print(response.text)
     return True
+
 
 def get_bets_of_user(username):
 
@@ -181,11 +190,11 @@ def get_bets_of_user(username):
 
     return response.json()
 
+
 def get_positions(marketId):
     """
     Get all the positions of everyone in some market
     """
-
 
     url_query = f"https://api.manifold.markets/v0/market/{marketId}/positions"
     # Sleep for a time per request of API
@@ -196,7 +205,7 @@ def get_positions(marketId):
         print(f"Error fetching positions")
         print(response.text)
         return []
-    
+
     return response.json()
 
 
@@ -204,7 +213,6 @@ def get_position_for_user(marketId, userId):
     """
     Get all the positions of someone in some market
     """
-
 
     url_query = f"https://api.manifold.markets/v0/market/{marketId}/positions?userId={userId}"
     # Sleep for a time per request of API
@@ -215,7 +223,7 @@ def get_position_for_user(marketId, userId):
         print(f"Error fetching positions")
         print(response.text)
         return []
-    
+
     return response.json()
 
 
@@ -235,8 +243,9 @@ def request_loan():
         print(f"Error requesting loan")
         print(response.text)
         return []
-    
+
     return response.json()
+
 
 response = request_loan()
 print(response)

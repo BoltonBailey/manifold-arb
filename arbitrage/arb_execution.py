@@ -20,14 +20,14 @@ DRY_RUN = True
 SHARE_HOLDING_LIMIT = 300
 ROI_FLOOR = 0.01
 
-logging.basicConfig(format='%(levelname)s:%(asctime)s %(message)s', 
-                    filename='bot.log', encoding='utf-8', 
+logging.basicConfig(format='%(levelname)s:%(asctime)s %(message)s',
+                    filename='bot.log', encoding='utf-8',
                     level=logging.DEBUG)
+
 
 def log(msg):
     logging.info(msg)
     print(msg)
-
 
 
 # pos = get_position_for_user("v4uXdQHU0VFksoecHm5C", BOT_ID)
@@ -55,7 +55,7 @@ def sort_and_execute_arbs():
 
     log(f"Found {len(complimentary_collections)} complimentary collections")
     log("\n")
-    
+
     for portfolio in complimentary_collections:
 
         holdings = {}
@@ -73,10 +73,10 @@ def sort_and_execute_arbs():
                 yes_shares = position["totalShares"]["YES"]
             else:
                 yes_shares = 0
-            
+
             if position["hasNoShares"]:
                 no_shares = position["totalShares"]["NO"]
-            else:    
+            else:
                 no_shares = 0
 
             holdings[share] = yes_shares if share.yes else no_shares
@@ -85,9 +85,11 @@ def sort_and_execute_arbs():
 
         # print(f"holdings: {holdings}")
         # print(f"complimentary_holdings: {complimentary_holdings}")
-        portfolio.exec_arbs(dry_run=DRY_RUN, holdings=holdings, complimentary_holdings=complimentary_holdings)
+        portfolio.exec_arbs(dry_run=DRY_RUN, holdings=holdings,
+                            complimentary_holdings=complimentary_holdings)
 
     log(f"starting balance {starting_balance} to ending balance {get_balance()}")
+
 
 log("Starting scheduled arb execution bot")
 
