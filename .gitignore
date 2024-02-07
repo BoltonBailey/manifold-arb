@@ -3,3 +3,9 @@
 **/img/**
 .vscode/**
 .DS_Store
+bot.log
+**/misc/**
+**/data/**
+**/logs/**
+**/politics/**
+**/wolfsheep/**

@@ -9,7 +9,7 @@ from constants import API_KEY
 
 READ_REQUEST_RATE_LIMIT = 0.01 # seconds
 BET_RATE_LIMIT = 6 # seconds
-USERNAME = "JointBot"
+BOT_USERNAME = "JointBot"
 BOT_ID = "dTaXWSfwgkSAJDDlzmIGrEQIl2X2"
 
 def get_balance():
@@ -17,7 +17,7 @@ def get_balance():
     Get the balance of the bot's account.
     """
 
-    url_query = f"https://api.manifold.markets/v0/user/{USERNAME}"
+    url_query = f"https://api.manifold.markets/v0/user/{BOT_USERNAME}"
     # Sleep for a time per request of API
     time.sleep(READ_REQUEST_RATE_LIMIT)
     response = requests.get(url_query)
@@ -29,7 +29,6 @@ def get_balance():
 
     return response.json()["balance"]
 
-@functools.lru_cache(maxsize=128)
 def get_data_from_slug(slug):
 
     print(f"Getting market data for {slug}")
@@ -47,7 +46,6 @@ def get_data_from_slug(slug):
 
     return response.json()
 
-@functools.lru_cache(maxsize=128)
 def get_data_from_marketID(marketId):
 
     print(f"Getting market data for {marketId}")
@@ -84,13 +82,13 @@ def get_markets():
     return response.json()
 
 
-def post_order_binary(market_id, mana_amount, outcome, limit_prob, expiration_delta=60*1000):
+def post_order_binary(market_id, mana_amount, outcome, end_prob, expiration_delta=60*1000):
     """
     Post an order to the market with the given id.
     """
     # TODO see https://docs.manifold.markets/api#post-v0bets for docs on posting orders
 
-    print(f"Posting order for market {market_id}, for {mana_amount} mana to outcome {outcome}, with limit prob {limit_prob}")
+    print(f"Posting order for market {market_id}, for {mana_amount} mana to outcome {outcome}, with end prob {end_prob}")
 
     # From mqp "yeah you need to specify also an answerId"
 
@@ -98,13 +96,13 @@ def post_order_binary(market_id, mana_amount, outcome, limit_prob, expiration_de
 
     expiration_time = time.time() + expiration_delta
 
-    # url_query = f"https://api.manifold.markets/v0/bet?amount={amount}&contractId={market_id}&outcome={outcome}&limitProb={limit_prob}&expiresAt={expiration_time}"
+    # url_query = f"https://api.manifold.markets/v0/bet?amount={amount}&contractId={market_id}&outcome={outcome}&limitProb={end_prob}&expiresAt={expiration_time}"
     # Sleep for a time per request of API
     time.sleep(BET_RATE_LIMIT)
     response = requests.post(
         "https://api.manifold.markets/v0/bet",
         json={
-            "amount": int(mana_amount), # I think this can be a float if desired
+            "amount": int(mana_amount), # This can't be a float, even though the backend supports floats
             "outcome": outcome,
             "contractId": market_id
         },
@@ -119,8 +117,16 @@ def post_order_binary(market_id, mana_amount, outcome, limit_prob, expiration_de
         print(response.text)
         return False
     
+
+    if abs(response.json()["probAfter"] - end_prob) > 0.001:
+        print(f"Weird order for market {market_id}")
+        print(f"Expected final prob {end_prob} but got {response.json()['probAfter']}")
+        print(response.text)
+        return True
+
     print("Success")
-    # print(response.text)
+
+    
     return True
 
 def post_order_independent_multi(market_id, answer_id, mana_amount, outcome, limit_prob, expiration_delta=60*1000):
@@ -175,25 +181,62 @@ def get_bets_of_user(username):
 
     return response.json()
 
-def get_positions():
+def get_positions(marketId):
     """
-    Get all the positions of the bot's account.
+    Get all the positions of everyone in some market
     """
 
-    # POST
-    # https://api.manifold.markets/get-user-contract-metrics-with-contracts
 
-    # {
-    # "userId":"srFlJRuVlGa7SEJDM4cY9B5k4Lj2",
-    # "offset":0,
-    # "limit":5000
-    # }
-
-    url_query = f"https://api.manifold.markets/get-user-contract-metrics-with-contracts"
+    url_query = f"https://api.manifold.markets/v0/market/{marketId}/positions"
     # Sleep for a time per request of API
     time.sleep(READ_REQUEST_RATE_LIMIT)
-    response = requests.post(url_query, json={
-        "userId": BOT_ID,
-        "offset": 0,
-        "limit": 5000
-    })
+    response = requests.get(url_query)
+
+    if response.status_code != 200:
+        print(f"Error fetching positions")
+        print(response.text)
+        return []
+    
+    return response.json()
+
+
+def get_position_for_user(marketId, userId):
+    """
+    Get all the positions of someone in some market
+    """
+
+
+    url_query = f"https://api.manifold.markets/v0/market/{marketId}/positions?userId={userId}"
+    # Sleep for a time per request of API
+    time.sleep(READ_REQUEST_RATE_LIMIT)
+    response = requests.get(url_query)
+
+    if response.status_code != 200:
+        print(f"Error fetching positions")
+        print(response.text)
+        return []
+    
+    return response.json()
+
+
+def request_loan():
+
+    url_query = f"https://api.manifold.markets/request-loan"
+    # Sleep for a time per request of API
+    time.sleep(BET_RATE_LIMIT)
+    response = requests.get(
+        url_query,
+        headers={
+            "Authorization": f"Key {API_KEY}"
+        }
+    )
+
+    if response.status_code != 200:
+        print(f"Error requesting loan")
+        print(response.text)
+        return []
+    
+    return response.json()
+
+response = request_loan()
+print(response)

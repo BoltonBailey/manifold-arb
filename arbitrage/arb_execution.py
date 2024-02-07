@@ -8,61 +8,110 @@ It calculates the optimal risk-free profit for a particular arbitrage opportunit
 
 from shares import *
 from arb_listing import complimentary_collections
-from api import get_balance
+from api import get_balance, get_position_for_user, request_loan, BOT_USERNAME, BOT_ID
+import json
+import logging
+import schedule
 
 DRY_RUN = False
+DRY_RUN = True
+
+# A maximum number of shares to hold of any one type
+SHARE_HOLDING_LIMIT = 300
+ROI_FLOOR = 0.01
+
+logging.basicConfig(format='%(levelname)s:%(asctime)s %(message)s', 
+                    filename='bot.log', encoding='utf-8', 
+                    level=logging.DEBUG)
+
+def log(msg):
+    logging.info(msg)
+    print(msg)
 
 
 
+# pos = get_position_for_user("v4uXdQHU0VFksoecHm5C", BOT_ID)
 
-total_mana_spent = 0
-starting_balance = get_balance()
+# print(json.dumps(pos, indent=4))
+# quit()
 
-# Sort complimentary collections by decreasing ROI
-complimentary_collections.sort(key=lambda portfolio: portfolio.get_arb_stats()[-1], reverse=True)
-touched_markets = set()
-
-for portfolio in complimentary_collections:
-
-    # If we've already touched any of the markets in this collection, skip it
-    if any(share.market.market_id in touched_markets for share in portfolio.shares):
-        continue
-
-    # Add all the markets in this collection to the touched markets
-    for share in portfolio.shares:
-        touched_markets.add(share.market.market_id)
+# logging.info(request_loan())
+# quit()
 
 
-    print(f"\n-----")
-    mana_spent, share_amounts, initial_probs, final_probs, profit, roi = portfolio.get_arb_stats()
+# s = Share("will-donald-trump-be-the-2024-nomin")
+# pos = get_position_for_user(s.market.market_id, BOT_ID)
 
-    if profit is None or profit <= 0 or roi <= 0.01:
-        continue
+# logging.info(json.dumps(pos, indent=4))
 
-    for i, share in enumerate(portfolio.shares):
-        print(f"   {share} at {share.market.url}")
-        print(f"       suggested spend {int(mana_spent[i])} mana to get {share_amounts[i]:.1f} shares")
-        print(f"       From initial prob {initial_probs[i]:.2f} to final prob {final_probs[i]:.2f}")
-    about_to_spend = sum(mana_spent)
-    print(f"This arb profits {profit} on a total mana investment of {about_to_spend}, for an ROI of {100*roi:.2f}%")
-
-    if about_to_spend + total_mana_spent > starting_balance:
-        print("Not enough mana")
-        continue
+# quit()
 
 
-    for i, share in enumerate(portfolio.shares):
-        print(f"\nOn the market: {share}")
-        print(f"   at {share.market.url}")
-        print(f"   pay {mana_spent[i]:.0f} mana for {share_amounts[i]:.2f} shares")
+def sort_and_execute_arbs():
 
-        if not DRY_RUN:
-            success = share.market.post_order(mana_spent[i], "YES" if share.yes else "NO", final_probs[i])
-            if not success:
-                print("Failed to post order")
-                quit()
-        total_mana_spent += mana_spent[i]
+    log(f"Assessing arbs...")
 
+    starting_balance = get_balance()
 
-print(f"Total mana spent {total_mana_spent} from starting balance {starting_balance} to ending balance {get_balance()}")
+    log(f"Found {len(complimentary_collections)} complimentary collections")
+    log("\n")
+    
+    for portfolio in complimentary_collections:
 
+        holdings = {}
+        complimentary_holdings = {}
+
+        for share in portfolio.shares:
+            positions = get_position_for_user(share.market.market_id, BOT_ID)
+            if len(positions) == 0:
+                holdings[share] = 0
+                complimentary_holdings[share] = 0
+                continue
+            assert len(positions) == 1
+            position = positions[0]
+            if position["hasYesShares"]:
+                yes_shares = position["totalShares"]["YES"]
+            else:
+                yes_shares = 0
+            
+            if position["hasNoShares"]:
+                no_shares = position["totalShares"]["NO"]
+            else:    
+                no_shares = 0
+
+            holdings[share] = yes_shares if share.yes else no_shares
+            complimentary_holdings[share] = no_shares if share.yes else yes_shares
+            # print(position)
+
+        # print(f"holdings: {holdings}")
+        # print(f"complimentary_holdings: {complimentary_holdings}")
+        portfolio.exec_arbs(dry_run=DRY_RUN, holdings=holdings, complimentary_holdings=complimentary_holdings)
+
+    log(f"starting balance {starting_balance} to ending balance {get_balance()}")
+
+log("Starting scheduled arb execution bot")
+
+log("running loop")
+while True:
+    log("running sort_and_execute_arbs")
+    sort_and_execute_arbs()
+    quit()
+    time.sleep(1 * 60)
+    log("1")
+    time.sleep(1 * 60)
+    log("2")
+    time.sleep(1 * 60)
+    log("3")
+    time.sleep(1 * 60)
+    log("4")
+    time.sleep(1 * 60)
+    log("5")
+    time.sleep(1 * 60)
+    log("6")
+    time.sleep(1 * 60)
+    log("7")
+    time.sleep(1 * 60)
+    log("8")
+    time.sleep(1 * 60)
+    log("9")
+    time.sleep(1 * 60)
