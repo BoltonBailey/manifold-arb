@@ -63,6 +63,6 @@ The main thing is the `arbitrage/` folder, which contains an implementation of a
 - [ ] Account for risk of bad data entry
 - [ ] [Rate limit better](https://pypi.org/project/ratelimit/)
   - [ ] The thing I don't like about this is that it probably doesn't persist over me terminating and re-executing my bot
-- [ ] Access the api via `manifoldpy`
+- [ ] Access the api via [`manifoldpy`](https://github.com/vluzko/manifoldpy)/[`PyManifold`](https://github.com/bcongdon/PyManifold)
   - [ ] Unfortunately, `manifoldpy` looks a bit unmaintained now, so consider this a dependent issue. Frankly, what should perhaps be done is to fold much of the code here into manifoldpy.
 - [X] Make `Share` hashable
