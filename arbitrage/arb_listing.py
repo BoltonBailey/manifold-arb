@@ -1,8 +1,8 @@
 """
-Create a list of combinations of shares that are fungible with each other, and combinations of shares that sum to at least 1.
+Create a list of combinations of shares that are fungible with each other, and (from that) portfolios of shares that sum to at least 1.
 """
 
-from portfolio import *
+from portfolio import Share, Portfolio
 
 # TODO https://manifold.markets/BottieMcBotface
 
