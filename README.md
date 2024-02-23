@@ -57,6 +57,7 @@ This repository is a personal project and may have bugs. Use at your own risk, a
 ## General TODOs
 
 - [ ] Track limit orders when computing arbs
+  - [ ] See <https://docs.manifold.markets/api#get-v0bets> for docs on getting open limit orders
 - [ ] Move arb execution into portfolio.py
 - [ ] Prioritize opportunities by rate of return (risk-free profit / amount spent)^(1/time to resolve)
 - [ ] Account for whether existing holdings would be sold when making arb decisions

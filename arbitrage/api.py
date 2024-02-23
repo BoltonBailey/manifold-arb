@@ -3,7 +3,6 @@ Functions for access to the manifold API.
 """
 import time
 import requests
-import functools
 from constants import API_KEY
 
 
@@ -21,7 +20,7 @@ def get_balance():
     url_query = f"https://api.manifold.markets/v0/user/{BOT_USERNAME}"
     # Sleep for a time per request of API
     time.sleep(READ_REQUEST_RATE_LIMIT)
-    response = requests.get(url_query)
+    response = requests.get(url_query, timeout=10)
 
     if response.status_code != 200:
         print("Error fetching user data")
@@ -32,14 +31,16 @@ def get_balance():
 
 
 def get_data_from_slug(slug):
+    """
+    Get the data for a market with the given slug.
+    """
 
     print(f"Getting market data for {slug}")
-    # TODO see https://docs.manifold.markets/api#get-v0bets for docs on getting open limit orders
 
     url_query = f"https://api.manifold.markets/v0/slug/{slug}"
     # Sleep for a time per request of API
     time.sleep(READ_REQUEST_RATE_LIMIT)
-    response = requests.get(url_query)
+    response = requests.get(url_query, timeout=10)
 
     if response.status_code != 200:
         print(f"Error fetching for market {slug}")
@@ -50,14 +51,16 @@ def get_data_from_slug(slug):
 
 
 def get_data_from_marketID(marketId):
+    """
+    Get the data for a market with the given marketId.
+    """
 
     print(f"Getting market data for {marketId}")
-    # TODO see https://docs.manifold.markets/api#get-v0bets for docs on getting open limit orders
 
     url_query = f"https://api.manifold.markets/v0/market/{marketId}"
     # Sleep for a time per request of API
     time.sleep(READ_REQUEST_RATE_LIMIT)
-    response = requests.get(url_query)
+    response = requests.get(url_query, timeout=10)
 
     if response.status_code != 200:
         print(f"Error fetching for market {marketId}")
@@ -71,12 +74,11 @@ def get_markets():
     """
     Get all the markets.
     """
-    # TODO see https://docs.manifold.markets/api#get-v0bets for docs on getting open limit orders
 
     url_query = "https://api.manifold.markets/v0/markets"
     # Sleep for a time per request of API
     time.sleep(READ_REQUEST_RATE_LIMIT)
-    response = requests.get(url_query)
+    response = requests.get(url_query, timeout=10)
 
     if response.status_code != 200:
         print("Error fetching for markets")
@@ -86,11 +88,12 @@ def get_markets():
     return response.json()
 
 
-def post_order_binary(market_id, mana_amount, outcome, end_prob, expiration_delta=60*1000):
+def post_order_binary(market_id, mana_amount, outcome, end_prob):
     """
     Post an order to the market with the given id.
+
+    See https://docs.manifold.markets/api#post-v0bet for API docs.
     """
-    # TODO see https://docs.manifold.markets/api#post-v0bets for docs on posting orders
 
     print(
         f"Posting order for market {market_id}, for {mana_amount} mana to outcome {outcome}, with end prob {end_prob}")
@@ -99,9 +102,6 @@ def post_order_binary(market_id, mana_amount, outcome, end_prob, expiration_delt
 
     assert (outcome in ["YES", "NO"])
 
-    expiration_time = time.time() + expiration_delta
-
-    # url_query = f"https://api.manifold.markets/v0/bet?amount={amount}&contractId={market_id}&outcome={outcome}&limitProb={end_prob}&expiresAt={expiration_time}"
     # Sleep for a time per request of API
     time.sleep(BET_RATE_LIMIT)
     response = requests.post(
@@ -115,7 +115,8 @@ def post_order_binary(market_id, mana_amount, outcome, end_prob, expiration_delt
         headers={
             "Content-Type": "application/json",
             "Authorization": f"Key {API_KEY}"
-        }
+        },
+        timeout=10
     )
 
     if response.status_code != 200:
@@ -135,20 +136,16 @@ def post_order_binary(market_id, mana_amount, outcome, end_prob, expiration_delt
     return True
 
 
-def post_order_independent_multi(market_id, answer_id, mana_amount, outcome, limit_prob, expiration_delta=60*1000):
+def post_order_independent_multi(market_id, answer_id, mana_amount, outcome, limit_prob):
     """
     Post an order to the multimarket market with the given id.
     """
-    # TODO see https://docs.manifold.markets/api#post-v0bets for docs on posting orders
 
     print(
         f"Posting order for market {market_id} {answer_id}, for {mana_amount} mana to outcome {outcome}, with limit prob {limit_prob}")
 
     assert (outcome in ["YES", "NO"])
 
-    expiration_time = time.time() + expiration_delta
-
-    # url_query = f"https://api.manifold.markets/v0/bet?amount={amount}&contractId={market_id}&outcome={outcome}&limitProb={limit_prob}&expiresAt={expiration_time}"
     # Sleep for a time per request of API
     time.sleep(BET_RATE_LIMIT)
     response = requests.post(
@@ -163,7 +160,8 @@ def post_order_independent_multi(market_id, answer_id, mana_amount, outcome, lim
         headers={
             "Content-Type": "application/json",
             "Authorization": f"Key {API_KEY}"
-        }
+        },
+        timeout=10
     )
 
     if response.status_code != 200:
@@ -181,7 +179,7 @@ def get_bets_of_user(username):
     url_query = f"https://api.manifold.markets/v0/bets?username={username}"
     # Sleep for a time per request of API
     time.sleep(READ_REQUEST_RATE_LIMIT)
-    response = requests.get(url_query)
+    response = requests.get(url_query, timeout=10)
 
     if response.status_code != 200:
         print(f"Error fetching bets of user {username}")
@@ -199,7 +197,7 @@ def get_positions(marketId):
     url_query = f"https://api.manifold.markets/v0/market/{marketId}/positions"
     # Sleep for a time per request of API
     time.sleep(READ_REQUEST_RATE_LIMIT)
-    response = requests.get(url_query)
+    response = requests.get(url_query, timeout=10)
 
     if response.status_code != 200:
         print("Error fetching positions")
@@ -217,7 +215,7 @@ def get_position_for_user(marketId, userId):
     url_query = f"https://api.manifold.markets/v0/market/{marketId}/positions?userId={userId}"
     # Sleep for a time per request of API
     time.sleep(READ_REQUEST_RATE_LIMIT)
-    response = requests.get(url_query)
+    response = requests.get(url_query, timeout=10)
 
     if response.status_code != 200:
         print("Error fetching positions")
@@ -236,7 +234,8 @@ def request_loan():
         url_query,
         headers={
             "Authorization": f"Key {API_KEY}"
-        }
+        },
+        timeout=10
     )
 
     if response.status_code != 200:
@@ -247,5 +246,4 @@ def request_loan():
     return response.json()
 
 
-response = request_loan()
-print(response)
+print(request_loan())
