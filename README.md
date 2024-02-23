@@ -7,14 +7,14 @@ The main thing is the `arbitrage/` folder, which contains an implementation of a
 
 ## How to use the Arbitrage Bot
 
-1. Clone the repo
+1. Clone and `cd` into the repo
 2. Get your API Key from <https://manifold.markets/profile>
 3. Make a file called `constants.py` in the `arbitrage` folder
 4. Add a line to the file that looks like `API_KEY = "00000000-1111-2222-3333-444444444444"`, but using your own key.
-5. Run `arb_execution.py`.
+5. Run `python3.10 arbitrage/arb_execution.py`.
 6. Set `DRY_RUN=FALSE` at the top of that file and run it again.
 
-This repository is a personal project and may have bugs. Use at your own risk.
+This repository is a personal project and may have bugs. Use at your own risk, and please make in issue if there is a problem.
 
 ## TODOs
 
