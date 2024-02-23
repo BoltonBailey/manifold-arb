@@ -24,7 +24,7 @@ def get_balance():
     response = requests.get(url_query)
 
     if response.status_code != 200:
-        print(f"Error fetching user data")
+        print("Error fetching user data")
         print(response.text)
         return []
 
@@ -73,13 +73,13 @@ def get_markets():
     """
     # TODO see https://docs.manifold.markets/api#get-v0bets for docs on getting open limit orders
 
-    url_query = f"https://api.manifold.markets/v0/markets"
+    url_query = "https://api.manifold.markets/v0/markets"
     # Sleep for a time per request of API
     time.sleep(READ_REQUEST_RATE_LIMIT)
     response = requests.get(url_query)
 
     if response.status_code != 200:
-        print(f"Error fetching for markets")
+        print("Error fetching for markets")
         print(response.text)
         return []
 
@@ -202,7 +202,7 @@ def get_positions(marketId):
     response = requests.get(url_query)
 
     if response.status_code != 200:
-        print(f"Error fetching positions")
+        print("Error fetching positions")
         print(response.text)
         return []
 
@@ -220,7 +220,7 @@ def get_position_for_user(marketId, userId):
     response = requests.get(url_query)
 
     if response.status_code != 200:
-        print(f"Error fetching positions")
+        print("Error fetching positions")
         print(response.text)
         return []
 
@@ -229,7 +229,7 @@ def get_position_for_user(marketId, userId):
 
 def request_loan():
 
-    url_query = f"https://api.manifold.markets/request-loan"
+    url_query = "https://api.manifold.markets/request-loan"
     # Sleep for a time per request of API
     time.sleep(BET_RATE_LIMIT)
     response = requests.get(
@@ -240,7 +240,7 @@ def request_loan():
     )
 
     if response.status_code != 200:
-        print(f"Error requesting loan")
+        print("Error requesting loan")
         print(response.text)
         return []
 
