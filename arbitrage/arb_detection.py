@@ -114,7 +114,6 @@ for username in BOT_USERNAMES:
                     market1["slug"],
                     market2["slug"],
                 ])
-                print(f"\n")
 
 # Dump output to json file
 with open("arbs.json", "w") as f:

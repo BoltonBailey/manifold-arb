@@ -8,10 +8,8 @@ It calculates the optimal risk-free profit for a particular arbitrage opportunit
 
 from shares import *
 from arb_listing import complimentary_collections
-from api import get_balance, get_position_for_user, request_loan, BOT_USERNAME, BOT_ID
-import json
+from api import get_balance, get_position_for_user, BOT_ID
 import logging
-import schedule
 
 DRY_RUN = False
 DRY_RUN = True
