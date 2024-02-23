@@ -5,9 +5,19 @@ This repo contains several scripts for interacting with [Manifold Markets](https
 
 The main thing is the `arbitrage/` folder, which contains an implementation of an arbitrage bot based on `cvxpy`.
 
-## Arbs to add
+## How to use the Arbitrage Bot
 
-### Specific Categories
+1. Clone the repo
+2. Get your API Key from <https://manifold.markets/profile>
+3. Make a file called `constants.py` in the `arbitrage` folder
+4. Add a line to the file that looks like `API_KEY = "00000000-1111-2222-3333-444444444444"`, but using your own key.
+5. Run `arb_execution.py`
+
+
+
+## TODOs
+
+### Specific Arb Categories to add
 
 - [ ] Things in the other files in this project
 - [ ] 2024 POTUS
@@ -38,6 +48,10 @@ The main thing is the `arbitrage/` folder, which contains an implementation of a
   - [ ] Now that this is done, Identify arbs in unlinked multis.
 - [X] Add support for arbitrage opportunities where shares have different weights in the portfolio
 - [ ] Add support for arbitrage of conditional markets (P(A|B), P(A), P(A&B))
+
+### Other trading capabilities
+
+- [ ] CVX-enabled kelly betting.
 
 ## General TODOs
 
